@@ -23,19 +23,10 @@ if IsThisVillanovaCAVE():
     rawInput = vizconnect.getConfiguration().getRawDict("input")
     vizconnect.getAvatar().getAttachmentPoint("l_hand").getNode3d().remove()
     vizconnect.getAvatar().getAttachmentPoint("r_hand").getNode3d().remove()
-    viz.phys.enable()
-    #tracker = vizconnect.getRawTool('dtrack_flystick')
-    #tracker = viz.add('dtrack_flystick')?
     BUTTON_LEFT = 4
     BUTTON_LEFTMID = 3
     BUTTON_RIGHT = 1
     BUTTON_TRIGGER = 0
-    #trackerLine = vizshape.addCylinder(height=25.0,radius=.1,color=(0,1,0))
-    #xTrackRot,yTrackRot,zTrackRot = vizconnect.getTracker("dtrack_flystick").getEuler()
-    #xPos,yPos,zPos = vizconnect.getTracker("dtrack_flystick").getPosition()
-    #trackerLine.setEuler([xTrackRot,-90+yTrackRot,zTrackRot])
-    #trackerLine.setPosition([xPos,yPos,zPos])
-    #trackerLine.enable(viz.COLLIDE_NOTIFY)
 else:
     viz.go()
 
@@ -90,7 +81,6 @@ backArrow.setPosition(backArrowPosition[0])
 backArrow.enable(viz.COLLIDE_NOTIFY)
 backArrowhead = vizshape.addCone(height=1.5,radius=1.5,parent=backArrow,color=[1,0,0])
 backArrowhead.setPosition([0,2.7,0])
-#backArrow.collideSphere(radius=3)
 backArrow.visible(viz.OFF)
 backArrowhead.visible(viz.OFF)
 if IsThisVillanovaCAVE():
@@ -103,7 +93,6 @@ forwardArrow.setPosition(forwardArrowPosition[0])
 forwardArrow.enable(viz.COLLIDE_NOTIFY)
 forwardArrowhead = vizshape.addCone(height=1.5,radius=1.5,parent=forwardArrow,color=[1,0,0])
 forwardArrowhead.setPosition([0,2.7,0])
-#forwardArrow.collideSphere(radius=3)
 if IsThisVillanovaCAVE():
     fArrowP1 = Point(forwardArrowPosition[0][0],forwardArrowPosition[0][1],forwardArrowPosition[0][2])
     forwardVec = Vector(fArrowP1,flystickP)

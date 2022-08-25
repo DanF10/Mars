@@ -651,3 +651,4 @@ def onButtonDown(e):
 if IsThisVillanovaCAVE():
     viz.callback(viz.SENSOR_DOWN_EVENT, onButtonDown)
     
+print('hello world lmao')

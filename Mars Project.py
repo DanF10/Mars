@@ -245,43 +245,8 @@ starPos.append([1.1,0,3.55])
 starPos.append([1.05,0,3.5])
 starPos.append([.95,0,3.4]) 
 
-objects = [forwardArrow,minimap,backArrow,minimap]
-objectCount = -1
-
 forwardSelected = False
 backSelected = False
-
-'''
-def onCollideBegin(e):
-    global forwardArrow,forwardArrowhead,backArrow,backArrowhead
-    print('collide begin')
-    if e.obj1 is forwardArrow or e.obj2 is forwardArrow:
-        forwardSelected = True
-        forwardArrow.color(0,1,0)
-        forwardArrowhead.color(0,1,0)
-        minimap.setParent(forwardArrow)
-        if (forwardArrow.getPosition()[0] < 0):
-            minimap.setPosition([8,3,0])
-            minimap.setEuler([-90,220,0])
-        else:
-            minimap.setPosition([-8,3,0])
-            minimap.setEuler([90,220,0])
-        minimap.visible(viz.ON)
-        blueStar.setPosition(starPos[arrayPos+1])
-    elif e.obj1 is backArrow or e.obj2 is backArrow:
-        backSelected = True
-        backArrow.color(0,1,0)
-        backArrowhead.color(0,1,0)
-        minimap.setParent(backArrow)
-        minimap.setPosition([-8,3,0])
-        minimap.setEuler([90,220,0])
-        minimap.visible(viz.ON)
-        blueStar.setPosition(starPos[arrayPos-1])
-
-
-if IsThisVillanovaCAVE():        
-    viz.callback(viz.COLLIDE_BEGIN_EVENT,onCollideBegin)
-'''
 
 def onMouseMove(e):
     #bigMap math
@@ -494,70 +459,32 @@ hasRun = False
 bigMapRun = False
 
 def onButtonDown(e):
-    global hasRun, counter, bigMapRun, objectCount
+    global hasRun, counter, bigMapRun
     if IsThisVillanovaCAVE():
-        if rawInput['flystick'].isButtonDown(BUTTON_RIGHT): 
-            objectCount = objectCount + 1
-            if objectCount >= len(objects):
-                objectCount = 0
-        elif rawInput['flystick'].isButtonDown(BUTTON_LEFT):
-            objectCount = objectCount - 1
-            if objectCount < 0:
-                objectCount = len(objects)-1
-        if objectCount >= 0 and objectCount < len(objects):
-            if objects[objectCount] is forwardArrow:
-                forwardArrow.color(0,1,0)
-                forwardArrowhead.color(0,1,0)
-                minimap.setParent(forwardArrow)
-                if (forwardArrow.getPosition()[0] < 0):
-                    minimap.setPosition([8,3,0])
-                    minimap.setEuler([-90,220,0])
-                else:
-                    minimap.setPosition([-8,3,0])
-                    minimap.setEuler([90,220,0])
-                minimap.visible(viz.ON)
-                background.visible(viz.OFF)
-                blueStar.setPosition(starPos[arrayPos+1])
-            elif objectCount == 1 or objectCount == 3:
-                if objectCount == 1:
-                    minimap.setParent(forwardArrow)
-                else: 
-                    minimap.setParent(backArrow)
-                background.visible(viz.ON)
-                forwardArrow.color(1,0,0)
-                backArrow.color(1,0,0)
-            else:
-                backArrow.color(0,1,0)
-                backArrowhead.color(0,1,0)
-                minimap.setParent(backArrow)
-                minimap.setPosition([-8,3,0])
-                minimap.setEuler([90,220,0])
-                minimap.visible(viz.ON)
-                background.visible(viz.OFF)
-                blueStar.setPosition(starPos[arrayPos-1])
-                
-            '''
-            if minimap.getVisible() and mapSelect:
-                mapSelect = False
-                arrowSelect = True
-                hasRun = True
-                minimap.visible(viz.OFF)
-                background.visible(viz.OFF)
-            elif minimap.getVisible() and not mapSelect and not hasRun:
-                mapSelect = True
-                arrowSelect = False
-                background.visible(viz.ON)
-            hasRun = False
-            '''
-        elif rawInput['flystick'].isButtonDown(BUTTON_TRIGGER):
-            '''
+        if rawInput['flystick'].isButtonDown(BUTTON_TRIGGER):
+            #vector math
             xRot,yRot,zRot = vizconnect.getTracker("dtrack_flystick").getEuler()
             xPos,yPos,zPos = vizconnect.getTracker("dtrack_flystick").getPosition()
-            trackerX = 20*math.sin(viz.radians(int(xRot)))*math.sin(viz.radians(90-int(yRot)))
-            trackerY = -20*math.cos(viz.radians(90-int(yRot)))
-            trackerZ = 20*math.cos(viz.radians(int(xRot)))*math.sin(viz.radians(90-int(yRot)))
-            info = viz.intersect([xPos,yPos,zPos],[trackerX,trackerY,trackerZ])
-            hoverObject = info.object
+            pX = 20*math.sin(viz.radians(int(xRot)))*math.sin(viz.radians(90-int(yRot)))
+            pY = -20*math.cos(viz.radians(90-int(yRot)))
+            pZ = 20*math.cos(viz.radians(int(xRot)))*math.sin(viz.radians(90-int(yRot)))
+            flystickP = Point(xPos,yPos,zPos)
+            flystickP2 = Point(pX,pY,pZ)
+            viewVec = Vector(flystickP,flystickP2)
+            fArrowP1 = Point(forwardArrowPosition[arrayPos][0],forwardArrowPosition[arrayPos][1],forwardArrowPosition[arrayPos][2])
+            #vector between forward arrow and view position
+            forwardVec = Vector(fArrowP1,flystickP)
+            bArrowP1 = Point(backArrowPosition[arrayPos][0],backArrowPosition[arrayPos][1],backArrowPosition[arrayPos][2])
+            backVec = Vector(bArrowP1,flystickP)
+            forwardDotProduct = (viewVec ^ forwardVec)/(viewVec.magnitude() * forwardVec.magnitude())
+            backDotProduct = (viewVec ^ backVec)/(viewVec.magnitude() * backVec.magnitude())
+
+            if abs(forwardDotProduct) >= .95 and abs(forwardDotProduct) <= 1 and forwardArrow.getVisible():
+                hoverObject = forwardArrow
+            elif abs(backDotProduct) >= .95 and abs(backDotProduct) <= 1 and backArrow.getVisible():
+                hoverObject = backArrow
+            else:
+                hoverObject = None
             #back arrow
             if (hoverObject == backArrow or hoverObject == backArrowhead) and arrayPos > 0 and not mapSelect:
                 viztask.schedule(backButtonTransition(arrayPos-1))
@@ -567,31 +494,6 @@ def onButtonDown(e):
                 print('map selected')
                 bigMapRun = True
                 mapSelect = False
-                background.visible(viz.OFF)
-                minimap.visible(viz.OFF)
-                bigMap.visible(viz.ON)
-                if backArrow.getVisible():
-                    backArrow.visible(viz.OFF)
-                    backArrowhead.visible(viz.OFF)
-                if forwardArrow.getVisible():
-                    forwardArrow.visible(viz.OFF)
-                    forwardArrowhead.visible(viz.OFF)
-                star.setParent(bigMap)
-                blueStar.setParent(bigMap)
-                star.setPosition([starPos[arrayPos][0]/4*8,0,starPos[arrayPos][2]/4*4.5])
-                if minimap.getParents()[0] == forwardArrow:
-                    counter=1
-                    blueStar.setPosition([starPos[arrayPos+1][0]/4*8,0,starPos[arrayPos+1][2]/4*4.5])
-                else:
-                    counter=-1
-                    blueStar.setPosition([starPos[arrayPos-1][0]/4*8,0,starPos[arrayPos-1][2]/4*4.5])
-            '''
-            if objects[objectCount] is forwardArrow:
-                viztask.schedule(forwardButtonTransition(arrayPos+1))
-            elif objects[objectCount] is backArrow:
-                viztask.schedule(backButtonTransition(arrayPos-1))
-            else:
-                bigMapRun = True
                 background.visible(viz.OFF)
                 minimap.visible(viz.OFF)
                 bigMap.visible(viz.ON)
